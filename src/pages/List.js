@@ -6,7 +6,7 @@ class List extends React.Component {
     pizza: { name: "Pizza", time: 180, warning: 60, alert: 20 },
     galletas: { name: "Galletas", time: 120, warning: 30, alert: 10 },
     pan: { name: "Pan", time: 300, warning: 120, alert: 30 },
-    temp: { name: "Name", time: 60, warning: 30, alert: 5},
+    temp: { name: "Name", time: 0, warning: 0, alert: 0},
   };
 
   handleChange = (e) => {

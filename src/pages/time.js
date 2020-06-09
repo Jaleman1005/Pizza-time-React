@@ -27,30 +27,46 @@ class Time extends React.Component {
     },
   };
 
-  startTimer() {
-    const timerIntervalTemp = setInterval(() => {
-      if (this.state.temp !== this.props.type.name) {
-        this.setState({ temp: this.props.type.name});
-        this.update();
-        console.log(this.state.timeLeft);
-      }
-      this.setState({ timePassed: this.state.timePassed + 1 });
-      this.setState({
-        timeLeft: this.state.TIME_LIMIT - this.state.timePassed,
-      });
+  startTimer = () => {
+    this.setState({
+      TIME_LIMIT: this.props.type.time,
+      timeLeft: this.props.type.time,
+      WARNING_THRESHOLD: this.props.type.warning,
+      ALERT_THRESHOLD: this.props.type.alert,
+      timePassed: 0,
+    });
 
-      document.getElementById(
-        "base-timer-label"
-      ).innerHTML = this.formatTimeLeft(this.state.timeLeft);
-      this.setCircleDasharray();
-      this.setRemainingPathColor(this.state.timeLeft);
+    this.setState({
+      timerInterval: setInterval(() => {
+        this.setState({ timePassed: this.state.timePassed + 1 });
+        this.setState({
+          timeLeft: this.state.TIME_LIMIT - this.state.timePassed,
+        });
 
-      if (this.state.timeLeft === 0) {
-        this.onTimesUp();
-      }
-    }, 1000);
-    this.setState({ timerInterval: timerIntervalTemp });
-  }
+        document.getElementById(
+          "base-timer-label"
+        ).innerHTML = this.formatTimeLeft(this.state.timeLeft);
+        this.setCircleDasharray();
+        this.setRemainingPathColor(this.state.timeLeft);
+
+        if (this.state.timeLeft === 0) {
+          this.onTimesUp();
+        }
+      }, 1000),
+    });
+  };
+
+  StopInterval = () => {
+    clearInterval(this.state.timerInterval);
+    this.setState({
+      TIME_LIMIT: this.props.type.time,
+      timeLeft: this.props.type.time,
+      WARNING_THRESHOLD: this.props.type.warning,
+      ALERT_THRESHOLD: this.props.type.alert,
+      timePassed: 0,
+    });
+    this.restartPathColor();
+  };
 
   update() {
     this.setState({
@@ -69,7 +85,7 @@ class Time extends React.Component {
 
   componentDidMount() {
     this.setState({ remainingPathColor: this.state.COLOR_CODES.info.color });
-    this.startTimer();
+    /* this.startTimer(); */
   }
 
   formatTimeLeft = (time) => {
@@ -121,9 +137,17 @@ class Time extends React.Component {
         .classList.add(warning.color);
     }
   }
+  restartPathColor = () => {
+    const { alert, warning, info } = this.state.COLOR_CODES;
+      document
+        .getElementById("base-timer-path-remaining")
+        .classList.remove(alert.color || warning.color);
+      document
+        .getElementById("base-timer-path-remaining")
+        .classList.add(info.color);
+  }
 
   render() {
-
     return (
       <div className="container">
         <h1>{this.props.type.name}</h1>
@@ -157,7 +181,28 @@ class Time extends React.Component {
             {this.formatTimeLeft(this.state.timeLeft)}
           </span>
         </div>
-        <input name="start" id="start" class="btn btn-primary" type="button" value="Start" onClick={this.startTimer}/>
+        <div class="row">
+          <div class="col-8">
+            <input
+              name="start"
+              id="start"
+              className="btn btn-primary"
+              type="button"
+              value="Start"
+              onClick={this.startTimer}
+            />
+          </div>
+          <div class="col-4">
+            <input
+              name="Stop"
+              id="Stop"
+              className="btn btn-danger"
+              type="button"
+              value="Stop"
+              onClick={this.StopInterval}
+            />
+          </div>
+        </div>
       </div>
     );
   }
