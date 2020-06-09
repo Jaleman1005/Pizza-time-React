@@ -69,7 +69,7 @@ class Time extends React.Component {
 
   componentDidMount() {
     this.setState({ remainingPathColor: this.state.COLOR_CODES.info.color });
-    /* this.startTimer(); */
+    this.startTimer();
   }
 
   formatTimeLeft = (time) => {
