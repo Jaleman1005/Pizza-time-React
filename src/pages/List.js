@@ -6,14 +6,14 @@ class List extends React.Component {
     pizza: { name: "Pizza", time: 180, warning: 60, alert: 20 },
     galletas: { name: "Galletas", time: 120, warning: 30, alert: 10 },
     pan: { name: "Pan", time: 300, warning: 120, alert: 30 },
-    temp: { name: "", time: 0, warning: 0, alert: 0 },
+    temp: { name: "----", time: 0, warning: 0, alert: 0 },
   };
-
+  //valida el cambio del select y toma el valor
   handleChange = (e) => {
     this.setState({ temp: e.target.value });
     this.handleSelect(e.target.value);
   };
-
+  //realiza las valdiaciones para enviar el dato al temporizador
   handleSelect = (e) => {
     if (e === this.state.pizza.name) {
       this.setState({ temp: this.state.pizza });
@@ -23,6 +23,9 @@ class List extends React.Component {
       } else {
         if (e === this.state.pan.name) {
           this.setState({ temp: this.state.pan });
+        } else {
+          const zero = { name: "----", time: 0, warning: 0, alert: 0 };
+          this.setState({ temp: zero });
         }
       }
     }
