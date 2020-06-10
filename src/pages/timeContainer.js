@@ -51,7 +51,8 @@ class TimeContainer extends React.Component {
       ALERT_THRESHOLD: this.props.type.alert,
       timePassed: 0,
     });
-
+    
+    clearInterval(this.state.timerInterval);
     this.setState({
       timerInterval: setInterval(() => {
         this.setState({ timePassed: this.state.timePassed + 1 });
