@@ -1,17 +1,23 @@
 import React from "react";
-import "./style/time.css";
 
-class Time extends React.Component {
+import "./style/time.css";
+import Timer from "../components/Timer";
+import Modal from "../components/Modal";
+
+class TimeContainer extends React.Component {
   state = {
+    modalIsOpen: false,
     temp: {},
+    buttonStart: "enable",
     FULL_DASH_ARRAY: 283,
-    TIME_LIMIT: this.props.type.time,
+    TIME_LIMIT: 0,
     timePassed: 0,
-    timeLeft: this.props.type.time,
+    timeLeft: 0,
     timerInterval: null,
+    validateChange: null,
     remainingPathColor: null,
-    WARNING_THRESHOLD: this.props.type.warning,
-    ALERT_THRESHOLD: this.props.type.alert,
+    WARNING_THRESHOLD: 0,
+    ALERT_THRESHOLD: 0,
     COLOR_CODES: {
       info: {
         color: "green",
@@ -26,9 +32,19 @@ class Time extends React.Component {
       },
     },
   };
-
+  //función que valdia si el tiempo del temporizador es 0 despliega un modal
+  validateCero = () => {
+    if (this.state.timeLeft !== 0) {
+      clearInterval(this.state.validateChange);
+      this.startTimer();
+    } else {
+      this.setState({ modalIsOpen: true, timeLeft: this.props.type.time });
+    }
+  };
+  //metodo para iniciar el conteo
   startTimer = () => {
     this.setState({
+      buttonStart: "enable",
       TIME_LIMIT: this.props.type.time,
       timeLeft: this.props.type.time,
       WARNING_THRESHOLD: this.props.type.warning,
@@ -55,9 +71,11 @@ class Time extends React.Component {
       }, 1000),
     });
   };
-
+  //metodo para reiniciar y detener el conteo
   StopInterval = () => {
+    this.validateChangeOption();
     clearInterval(this.state.timerInterval);
+    clearInterval(this.state.validateChange);
     this.setState({
       TIME_LIMIT: this.props.type.time,
       timeLeft: this.props.type.time,
@@ -67,27 +85,30 @@ class Time extends React.Component {
     });
     this.restartPathColor();
   };
-
-  update() {
-    this.setState({
-      TIME_LIMIT: this.props.type.time,
-      timeLeft: this.props.type.time,
-      WARNING_THRESHOLD: this.props.type.warning,
-      ALERT_THRESHOLD: this.props.type.alert,
-    });
-    clearInterval(this.state.timerInterval);
-    this.startTimer();
-  }
-
+  //elimina el interbalo para ahorrar memoria
   onTimesUp() {
     clearInterval(this.state.timerInterval);
   }
-
+  //se inicia en el momento en el que el componente se ve en pantalla e inicializa los colores.
   componentDidMount() {
     this.setState({ remainingPathColor: this.state.COLOR_CODES.info.color });
-    /* this.startTimer(); */
+    this.validateChangeOption();
   }
-
+  //se crea un intervalo para reiniciar el temporizador
+  validateChangeOption = () => {
+    this.setState({
+      validateChange: setInterval(() => {
+        this.setState({
+          TIME_LIMIT: this.props.type.time,
+          timeLeft: this.props.type.time,
+          WARNING_THRESHOLD: this.props.type.warning,
+          ALERT_THRESHOLD: this.props.type.alert,
+          timePassed: 0,
+        });
+      }),
+    });
+  };
+  //se establece el formato del contador que se muestra en la mitad del medio
   formatTimeLeft = (time) => {
     const minutes = Math.floor(time / 60);
 
@@ -99,14 +120,14 @@ class Time extends React.Component {
 
     return `${minutes}:${seconds}`;
   };
-
+  //calcula la fracción del tiempo
   calculateTimeFraction() {
     const rawTimeFraction = this.state.timeLeft / this.state.TIME_LIMIT;
     return (
       rawTimeFraction - (1 / this.state.TIME_LIMIT) * (1 - rawTimeFraction)
     );
   }
-
+  //metodo basado en los principios de la circunferencia para modificar el color del circulo
   setCircleDasharray() {
     const circleDasharray = `${(
       this.calculateTimeFraction() * this.state.FULL_DASH_ARRAY
@@ -115,7 +136,7 @@ class Time extends React.Component {
       .getElementById("base-timer-path-remaining")
       .setAttribute("stroke-dasharray", circleDasharray);
   }
-
+  //valida los tiempos para cambiar el color a la circunferencia
   setRemainingPathColor(timeLeft) {
     const { alert, warning, info } = this.state.COLOR_CODES;
 
@@ -126,8 +147,6 @@ class Time extends React.Component {
       document
         .getElementById("base-timer-path-remaining")
         .classList.add(alert.color);
-
-      // If the remaining time is less than or equal to 10, remove the base color and apply the "warning" class.
     } else if (this.state.timeLeft <= warning.threshold) {
       document
         .getElementById("base-timer-path-remaining")
@@ -137,74 +156,44 @@ class Time extends React.Component {
         .classList.add(warning.color);
     }
   }
+  //al oprimir el boton stop este metodo es llamda y se reinician los colores de la circunferencia
   restartPathColor = () => {
     const { alert, warning, info } = this.state.COLOR_CODES;
-      document
-        .getElementById("base-timer-path-remaining")
-        .classList.remove(alert.color || warning.color);
-      document
-        .getElementById("base-timer-path-remaining")
-        .classList.add(info.color);
-  }
+    document
+      .getElementById("base-timer-path-remaining")
+      .classList.remove(alert.color || warning.color);
+    document
+      .getElementById("base-timer-path-remaining")
+      .classList.add(info.color);
+  };
+
+  handleClose = (e) => {
+    this.setState({ modalIsOpen: false });
+  };
+
+  handleOpen = (e) => {
+    this.setState({ modalIsOpen: true });
+  };
 
   render() {
     return (
-      <div className="container">
-        <h1>{this.props.type.name}</h1>
-        <div className="base-timer">
-          <svg
-            className="base-timer__svg"
-            viewBox="0 0 100 100"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <g className="base-timer__circle">
-              <circle
-                className="base-timer__path-elapsed"
-                cx="50"
-                cy="50"
-                r="45"
-              />
-              <path
-                id="base-timer-path-remaining"
-                stroke-dasharray="283"
-                className={`base-timer__path-remaining ${this.state.remainingPathColor}`}
-                d="
-              M 50, 50
-          m -45, 0
-          a 45,45 0 1,0 90,0
-          a 45,45 0 1,0 -90,0
-        "
-              ></path>
-            </g>
-          </svg>
-          <span id="base-timer-label" className="base-timer__label">
-            {this.formatTimeLeft(this.state.timeLeft)}
-          </span>
-        </div>
-        <div class="row">
-          <div class="col-8">
-            <input
-              name="start"
-              id="start"
-              className="btn btn-primary"
-              type="button"
-              value="Start"
-              onClick={this.startTimer}
-            />
-          </div>
-          <div class="col-4">
-            <input
-              name="Stop"
-              id="Stop"
-              className="btn btn-danger"
-              type="button"
-              value="Stop"
-              onClick={this.StopInterval}
-            />
-          </div>
-        </div>
+      <div>
+        <Timer
+          name={this.props.type.name}
+          remainingPathColor={this.state.remainingPathColor}
+          formatTimeLeft={this.formatTimeLeft(this.state.timeLeft)}
+          onStart={this.validateCero}
+          onStop={this.StopInterval}
+        />
+        <Modal
+          isOpen={this.state.modalIsOpen}
+          onClose={this.handleClose}
+          onOpen={this.handleOpen}
+        >
+          Por favor seleccione un temporizador
+        </Modal>
       </div>
     );
   }
 }
-export default Time;
+export default TimeContainer;

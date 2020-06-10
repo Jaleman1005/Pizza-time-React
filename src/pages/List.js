@@ -1,12 +1,12 @@
 import React from "react";
-import Time from "./time";
+import TimeContainer from "./timeContainer";
 
 class List extends React.Component {
   state = {
     pizza: { name: "Pizza", time: 180, warning: 60, alert: 20 },
     galletas: { name: "Galletas", time: 120, warning: 30, alert: 10 },
     pan: { name: "Pan", time: 300, warning: 120, alert: 30 },
-    temp: { name: "Name", time: 0, warning: 0, alert: 0},
+    temp: { name: "", time: 0, warning: 0, alert: 0 },
   };
 
   handleChange = (e) => {
@@ -15,18 +15,18 @@ class List extends React.Component {
   };
 
   handleSelect = (e) => {
-      if (e === this.state.pizza.name) {
-          this.setState({temp: this.state.pizza});
-        } else {
-            if (e === this.state.galletas.name) {
-                this.setState({temp: this.state.galletas});
-            } else {
-                if (e === this.state.pan.name) {
-                    this.setState({temp: this.state.pan});
-             }
-         } 
+    if (e === this.state.pizza.name) {
+      this.setState({ temp: this.state.pizza });
+    } else {
+      if (e === this.state.galletas.name) {
+        this.setState({ temp: this.state.galletas });
+      } else {
+        if (e === this.state.pan.name) {
+          this.setState({ temp: this.state.pan });
+        }
       }
-  }
+    }
+  };
 
   render() {
     return (
@@ -47,7 +47,7 @@ class List extends React.Component {
             </select>
           </div>
         </div>
-        <Time type={this.state.temp} />
+        <TimeContainer type={this.state.temp} />
       </div>
     );
   }
